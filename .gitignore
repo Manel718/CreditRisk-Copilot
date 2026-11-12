@@ -1,0 +1,10 @@
+.venvagent/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.csv
+*.xls
+*.xlsx
+chroma_db/
+.vscode/
