@@ -14,7 +14,7 @@ df = pd.read_excel(FICHIER_EXCEL, header=1)
 df = df.drop(columns="ID", errors="ignore")  # l'identifiant client n'est pas utile
 df = df.rename(columns={"default payment next month": "default_payment_next_month"})
  
-# Vérification : on s'assure que les colonnes attendues sont bien là
+# Vérification : on s'assure que les colonnes sont présents dans le fichiers
 attendues = {"LIMIT_BAL", "SEX", "EDUCATION", "AGE", "BILL_AMT1", "default_payment_next_month"}
 manquantes = attendues - set(df.columns)
 if manquantes:

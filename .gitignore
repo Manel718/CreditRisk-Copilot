@@ -1,10 +1,21 @@
-.venvagent/
-.venv/
+
+# Environnements virtuels
+.venv*/
+venv/
+env/
+
+# Secrets
+.env
+
+# Python
 __pycache__/
 *.pyc
-.env
+
+# Données et documents
 *.csv
 *.xls
 *.xlsx
+docs/
+
+# Base vectorielle
 chroma_db/
-.vscode/

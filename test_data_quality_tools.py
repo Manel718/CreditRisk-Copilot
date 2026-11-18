@@ -40,7 +40,7 @@ assert res["nb_defauts"] == 6
 assert res["taux_defaut_pct"] == 54.5
 print("OK  taux_de_defaut")
  
-# --- defaut_par_variable ------------------------------------------------------
+####### defaut_par_variable #############
 res = DQT.defaut_par_variable(df, "defaut", "sexe")
 assert res["1.0"]["taux_defaut_pct"] == 75.0
 assert res["2.0"]["taux_defaut_pct"] == 50.0 

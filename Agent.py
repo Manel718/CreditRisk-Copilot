@@ -2,7 +2,7 @@
 CreditRisk Copilot : agent d'audit de données de crédit
 
 L'utilisateur donne un fichier CSV et pose des questions.
-L'agent choisit lui-même quels outilst de qualité de données (data_quality_tools.py) lancer,
+L'agent choisit lui-même quels outils de qualité de données (data_quality_tools.py) à lancer
 puis explique les résultats.
 
 Confidentialité : le LLM ne voit JAMAIS les lignes du fichier. Il reçoit
@@ -17,6 +17,7 @@ import sys
 import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI, BadRequestError
+from Rag_outil import chercher_documentation
 
 
 import data_quality_tools as DQT
@@ -62,6 +63,8 @@ FONCTIONS = {
     "defaut_par_variable": lambda colonne, **kw: DQT.defaut_par_variable(
         df, COLONNE_DEFAUT, colonne
     ),
+    "chercher_documentation": lambda question, 
+    **kw: chercher_documentation(question),
 }
 
 
@@ -120,6 +123,14 @@ OUTILS = [
         "Utile pour voir quelles variables discriminent le défaut.",
         {"colonne": "Nom exact de la variable explicative."},
     ),
+    _outil(
+    "chercher_documentation",
+    "Cherche dans la documentation réglementaire (orientations de l'EBA sur les pertes de crédit "
+    "attendues, guidance du Comité de Bâle) les passages qui répondent à une question de méthode "
+    "ou de réglementation : stages, provisionnement, gouvernance, validation des modèles. "
+    "N'analyse PAS les données du fichier chargé.",
+    {"question": "La question à rechercher, formulée de façon autonome."},
+    ),
 ]
 
 ######################################################
@@ -137,7 +148,22 @@ CONSIGNE = (
     "Ne cite que des chiffres renvoyés par les outils, n'en invente jamais. "
     "Si un outil renvoie une erreur, corrige ton appel ou explique le problème. "
     "Réponds en français, de façon concise : d'abord les constats chiffrés, "
-    "puis une courte recommandation."
+    "puis une courte recommandation. "
+    "Pour une question de méthode ou de réglementation (IFRS 9, stages, provisions), utilise "
+    "chercher_documentation. Réponds alors uniquement à partir des passages renvoyés, cite la "
+    "source de chaque affirmation (document, page, paragraphe), réponds en français même si les "
+    "passages sont en anglais, et si aucun passage pertinent n'est trouvé, dis-le au lieu de "
+    "répondre de mémoire. "
+    "Tu réponds uniquement aux questions sur le portefeuille chargé et sur la documentation "
+    "réglementaire (IFRS 9, EBA, Bâle). Pour toute autre question (culture générale, actualité, "
+    "cuisine...), dis poliment que ce n'est pas ton périmètre, sans y répondre. "
+    "Quand tu utilises chercher_documentation, appuie-toi uniquement sur le texte des passages : "
+    "n'ajoute aucune définition ni information venant de tes connaissances générales, et ne cite "
+    "jamais le titre d'un document de mémoire (utilise seulement le nom de fichier, la page et le "
+    "paragraphe des passages). Si les passages ne répondent pas à la question (par exemple s'ils ne "
+    "contiennent pas de définition), dis-le explicitement et résume seulement ce qu'ils disent du sujet. "
+    "Si la question demande explicitement ce que disent les documents, ou porte sur la réglementation "
+    "du crédit, appelle chercher_documentation avant de décider que la réponse est absente. "
 )
 
 
@@ -152,7 +178,7 @@ def en_json(resultat):
 
 ################################################################################
 ##############################La boucle de l'agent
-#
+
 def poser_question(question):
     messages = [
         {"role": "system", "content": CONSIGNE},
