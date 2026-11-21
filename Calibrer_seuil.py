@@ -53,5 +53,4 @@ if __name__ == "__main__":
     if pire_dedans < meilleur_dehors:
         print(f"Les deux groupes sont séparés : un seuil autour de {(pire_dedans + meilleur_dehors) / 2:.2f} convient.")
     else:
-        print("Les deux groupes se chevauchent : aucun seuil ne sépare tout. "
-              "Choisis le compromis qui te convient et note-le dans le README.")
+        print("Les deux groupes se chevauchent : aucun seuil ne sépare tout. ")
